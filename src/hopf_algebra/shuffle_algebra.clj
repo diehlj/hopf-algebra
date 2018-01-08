@@ -3,8 +3,7 @@
     "Implements the shuffle Hopf algebra and its dual, the concatenation Hopf algebra.
      see e.g. Reutenauer - Free Lie Algebras"}
   (:require 
-            [tupelo.core :as t]
-            [hopf-algebra.hopf-algebra :refer [product coproduct antipode to-str HopfAlgebra]]
+            [hopf-algebra.hopf-algebra :refer [product coproduct antipode to-latex to-str HopfAlgebra]]
             [clojure.math.combinatorics]
             [hopf-algebra.linear-combination :refer :all]))
 
@@ -74,7 +73,10 @@
   (to-str [a] (if (empty? (:content a))
                    "e"
                    (apply str (:content a))))
-  (to-latex [a] (to-str a)))
+  (to-latex [a] (to-str a))
+  (gorilla-render [a] {:type :latex :content (to-latex a)
+                                    :value (pr-str a)})
+  )
 
 (defn unit->ShuffleWord [c]
   {(->ShuffleWord []) c})
@@ -115,12 +117,23 @@
   (to-str [a] (if (empty? (:content a))
                    "e"
                    (apply str (:content a))))
-  (to-latex [a] (to-str a)))
+  (to-latex [a] (to-str a))
+  (gorilla-render [a] {:type :latex :content (to-latex a)
+                                    :value (pr-str a)}))
 
 (defn cw->sw [lc]
   (lc-apply-linear-function
     (fn [t]
       (letfn [(f [x] (->ShuffleWord (:content x)))]
+      (if (tensor? t)
+        { (map f t) 1}
+        { (f t) 1})))
+    lc))
+
+(defn sw->cw [lc]
+  (lc-apply-linear-function
+    (fn [t]
+      (letfn [(f [x] (->ConcatWord (:content x)))]
       (if (tensor? t)
         { (map f t) 1}
         { (f t) 1})))

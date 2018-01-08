@@ -7,7 +7,7 @@
      A linear combination \"plus\" is is of the form
      { e1 c1, e2 c2, .. }; where now cX itself are linear combinations."}
   hopf-algebra.linear-combination
-  (:require [hopf-algebra.hopf-algebra :refer [product coproduct antipode counit to-str to-latex]]))
+  (:require [hopf-algebra.hopf-algebra :refer [product coproduct antipode counit to-str to-latex HopfAlgebra]]))
 
 
 
@@ -128,7 +128,7 @@
 
 (declare lc-multiply-using)
 
-(defn lc-multiply ; XXX naming .. vs lc-product
+(defn lc-multiply ; TODO naming .. vs lc-product
   "Multiply an arbitrary number of lc's.
    First argument can be a scalar."
   [ & args ]
@@ -269,6 +269,24 @@
   (and (map? something)
        (every? (fn [ [k v] ] (lc? v)) something)))
 
+
+; one can put whatever one likes in the linear combination of coefficients appearing in a linear combination PLUS
+; here is a default to use
+(defrecord Coefficient [name options])
+
+(extend-type Coefficient
+  HopfAlgebra
+  (to-str [a] (str (:name a)
+                   (when (not (empty? (:options a)))
+                     (str " " (:options a)))))
+  (to-latex [a] (to-str a))
+  (gorilla-render [a] {:type :latex, :content (to-latex a)
+                                     :value (pr-str a)}))
+
+(defn ->Coefficient
+  ([name] (Coefficient. name nil))
+  ([name options] (Coefficient. name options)))
+
 (defn lc-plus-filter [f lc]
   {:pre [(lcp? lc)]}
   (into {} (filter #( f (key %) ) lc )))
@@ -303,7 +321,7 @@
         (fn [x y] (lc-add x y))
         lcp1 lcp2))))
 
-(defn- lc-plus-apply-linear-function-multiply [lc-val lc] ; XXX name
+(defn- lc-plus-apply-linear-function-helper [lc-val lc]
   ;;
   ;| lc-val = {"C1" 55}    lc = {object-1 10, object-2 100}
   ;| => {object-1 {"C1" 550}, object-2 {"C1" 5500}}
@@ -322,7 +340,7 @@
   (lc-plus-remove-zeros
     (reduce 
       (fn [result nexxt] (lc-plus-add result
-                                      (lc-plus-apply-linear-function-multiply (val nexxt) (f (key nexxt)))))
+                                      (lc-plus-apply-linear-function-helper (val nexxt) (f (key nexxt)))))
       {}
       lcp)))
 
@@ -347,8 +365,8 @@
        (apply str)))
 
 (defn- lc-plus-to-str-helper [index kv]
-  (let [coefficient (str "+ ( " (lc-to-str (val kv)) " )")]
-    (str coefficient "\\ " (tensor-to-str (key kv)))))
+  (let [coefficient (str "+ ( " (lc-to-str (val kv)) " )")] ; TODO first one should not get a "+"
+    (str coefficient " " (tensor-to-str (key kv)))))
 
 (defn lc-plus-to-str
   [lcp]
@@ -359,6 +377,21 @@
        (apply str)))
 
 
+(defn lc-lc-plus-inner-product
+  "Computes the inner product of lc, lcp,
+   assuming that its vectors (its keys) are orthonormal."
+  [lc lcp]
+  {:pre [(lc? lc) (lcp? lcp)]}
+  (loop [result {}
+         remaining (seq lc)]
+    (if (empty? remaining)
+      result
+      (recur
+        (lc-add result
+                (lc-multiply
+                   (val (first remaining))
+                   (get lcp (key (first remaining)) 0)))
+        (rest remaining)))))
 
 
 
@@ -401,3 +434,4 @@
 ;(def tensor-m1324
 ;  (comp (partial lc-apply-linear-function (tensor-functions product product) )
 ;;
+

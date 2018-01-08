@@ -1,6 +1,5 @@
 (ns hopf-algebra.shuffle-algebra-test
   (:require [clojure.test :refer :all]
-            [tupelo.core :as t]
             [hopf-algebra.hopf-algebra :refer [product coproduct antipode to-str HopfAlgebra]]
             [hopf-algebra.shuffle-algebra :refer :all]
             [hopf-algebra.linear-combination :refer :all]))

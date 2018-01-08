@@ -12,13 +12,12 @@ That is {"a" 5, "b" 17} stands for the linear combination 5 * "a" + 17 * "b".
 (let [lc-1 { "something" 5 }
       lc-2 { "something" 3,
              "something else" 2}]]
-  (lc/add (lc/multiply 10 lc-1) lc-2)) ; -> { "something" 53, "something else" 2}))
+  (lc/lc-add (lc/multiply 10 lc-1) lc-2)) ; -> { "something" 53, "something else" 2}))
 ```
 
-If "stuff" implements the HopfAlgebra protocol, we can do more:
+If "stuff" implements (parts of) the HopfAlgebra protocol, we can do more:
 
 ```clojure
-; algebra operations
 (defrecord Concatter [content])
 (extend-type Concatter
   HopfAlgebra
@@ -51,9 +50,11 @@ the shuffle Hopf algebra and, its dual, the concatenation Hopf algebra.
 
   ; we verify one of the axioms for an antipode
   (= {(->ShuffleWord []) 1}
-     (lc/lc-apply-linear-function lc/tensor-m12 (lc/lc-apply-linear-function lc/tensor-antipode-otimes-id (coproduct (->ShuffleWord [])))))
+     (lc/lc-apply-linear-function lc/tensor-m12
+                                  (lc/lc-apply-linear-function lc/tensor-antipode-otimes-id (coproduct (->ShuffleWord [])))))
   (= {}
-     (lc/lc-apply-linear-function lc/tensor-m12 (lc/lc-apply-linear-function lc/tensor-antipode-otimes-id (coproduct sw-1)))))
+     (lc/lc-apply-linear-function lc/tensor-m12
+                                  (lc/lc-apply-linear-function lc/tensor-antipode-otimes-id (coproduct sw-1)))))
 ```
 
 
@@ -71,7 +72,7 @@ This is helpful for doing simple symbolic calculations.
 
 ## Running the code
 
-Installation is simple if you have [leiningen][http://leiningen.org]; this tool will arrange
+Installation is simple if you have [leiningen](http://leiningen.org); this tool will arrange
 to retrieve everything else you need. On Mac OS, for example,
 
 ~~~ sh
@@ -87,6 +88,6 @@ To run the test suite:
 $ lein test
 ~~~
 
-Copyright © 2018 FIXME
+Copyright © 2018 Joscha Diehl
 
 Distributed under the [Eclipse Public License](https://opensource.org/licenses/eclipse-1.0.php), the same as Clojure.

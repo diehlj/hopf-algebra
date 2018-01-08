@@ -1,8 +1,6 @@
 (ns hopf-algebra.hopf-algebra
-  ^{:doc
-    "The HopfAlgebra protocol models a Hopf algebra https://en.wikipedia.org/wiki/Hopf_algebra.
-     Since a Hopf algebra is a vector space, this is tightly connected with linear_combination.clj."}
-  (:require [clojure.spec :as s]))
+   "The HopfAlgebra protocol models a Hopf algebra https://en.wikipedia.org/wiki/Hopf_algebra.
+    Since a Hopf algebra is a vector space, this is tightly connected with linear_combination.clj.")
   
 (defprotocol HopfAlgebra
   (product [a b]) ;- returns linear combination
