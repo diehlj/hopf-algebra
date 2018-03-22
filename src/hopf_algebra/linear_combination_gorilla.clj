@@ -22,7 +22,7 @@
   :open "",
   :close "",
   :separator " ",
-  :items [ {:type :html, :content (lc/lc-format-number index (val a))}
+  :items [ {:type :html, :content (lc/format-number index (val a))}
             (if (lc/tensor? (key a))
               (tensor-render (key a))
               (gorilla-render (key a))) ]

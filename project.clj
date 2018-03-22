@@ -4,7 +4,7 @@
 ;   - just latex stuff (then later get problems with graphs)
 ;   - put gorilla stuff now
 
-(defproject hopf-algebra "0.1.0-SNAPSHOT"
+(defproject hopf-algebra "0.2.0-SNAPSHOT"
   :description "A library to work with linear combinations of objects (usually they form a Hop algebra)."
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"

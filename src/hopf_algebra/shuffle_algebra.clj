@@ -5,7 +5,7 @@
   (:require 
             [hopf-algebra.hopf-algebra :refer [product coproduct antipode to-latex to-str HopfAlgebra]]
             [clojure.math.combinatorics]
-            [hopf-algebra.linear-combination :refer :all]))
+            [hopf-algebra.linear-combination :as lc]))
 
 
 (declare ->ShuffleWord)
@@ -39,7 +39,7 @@
 (defn sw-shuffle [sw-1 sw-2]
   (let [w-1 (:content sw-1)
         w-2 (:content sw-2)]
-    (lc-add-into {} (map (fn [w] [(->ShuffleWord w) 1]) (word-shuffle w-1 w-2)))))
+    (lc/add-into {} (map (fn [w] [(->ShuffleWord w) 1]) (word-shuffle w-1 w-2)))))
 
 (defn deconcatenation [w]
   (loop [n 0
@@ -47,12 +47,12 @@
     (if (> n (count w))
       result
       (recur (inc n)
-             (lc-add result (lc-lift [(->ShuffleWord (take n w)) (->ShuffleWord (drop n w))]))))))
+             (lc/+ result (lc/lift [(->ShuffleWord (take n w)) (->ShuffleWord (drop n w))]))))))
 
 (defn shuffle-antipode [w]
-  (lc-multiply
+  (lc/*
     (if (odd? (count w)) -1 1)
-    (lc-lift (->ShuffleWord (reverse w)))))
+    (lc/lift (->ShuffleWord (reverse w)))))
 
 (defrecord ShuffleWord
   ;;
@@ -95,13 +95,13 @@
     (if (= 1 (count w))
       { [ (->ConcatWord w) (->ConcatWord [])] 1,
         [ (->ConcatWord []) (->ConcatWord w)] 1 }
-      (lc-multiply (concat-coproduct (take 1 w))
+      (lc/* (concat-coproduct (take 1 w))
                    (concat-coproduct (rest w))))))
 
 (defn concat-antipode [w]
-  (lc-multiply
+  (lc/*
     (if (odd? (count w)) -1 1)
-    (lc-lift (->ConcatWord (reverse w))))) ;- the same as shuffle-antipode, apart from ->ConcatWord
+    (lc/lift (->ConcatWord (reverse w))))) ;- the same as shuffle-antipode, apart from ->ConcatWord
 
 (defrecord ConcatWord
   ;;
@@ -111,7 +111,7 @@
 
 (extend-type ConcatWord
   HopfAlgebra
-  (product [a b] (lc-lift (->ConcatWord (concat (:content a) (:content b)))))
+  (product [a b] (lc/lift (->ConcatWord (concat (:content a) (:content b)))))
   (coproduct [a] (concat-coproduct (:content a)))
   (antipode [a] (concat-antipode (:content a)))
   (counit [a] (if (empty? (:content a)) 1 0))
@@ -123,22 +123,22 @@
                                     :value (pr-str a)}))
 
 (defn cw->sw [lc]
-  (lc-apply-linear-function
+  (lc/apply-linear-function
     (fn [t]
       (letfn [(f [x] (->ShuffleWord (:content x)))]
-      (if (tensor? t)
+      (if (lc/tensor? t)
         { (map f t) 1}
         { (f t) 1})))
     lc))
 
 (defn sw->cw [lc]
-  (lc-apply-linear-function
+  (lc/apply-linear-function
     (fn [t]
       (letfn [(f [x] (->ConcatWord (:content x)))]
-      (if (tensor? t)
+      (if (lc/tensor? t)
         { (map f t) 1}
         { (f t) 1})))
     lc))
 
 (defn inner-product-sw-cw [lc-sw lc-cw]
-  (lc-inner-product lc-sw (cw->sw lc-cw)))
+  (lc/inner-product lc-sw (cw->sw lc-cw)))
