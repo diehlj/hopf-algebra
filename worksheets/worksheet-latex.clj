@@ -63,15 +63,11 @@ gorilla-repl
 
 ;; @@
 (->Listy [(render/render (grl/latex-view "x^2")), (render/render (grl/latex-view "x^3"))])
-(println (grl/latex-view "x^2"))
-(grl/latex-view "x^2")
+;(println (grl/latex-view "x^2"))
+;(grl/latex-view "x^2")
 ;; @@
-;; ->
-;;; #gorilla_repl.latex.LatexView{:content x^2}
-;;; 
-;; <-
 ;; =>
-;;; {"type":"latex","content":"x^2","value":"#gorilla_repl.latex.LatexView{:content \"x^2\"}"}
+;;; {"type":"list-like","open":"","close":"","seperator":",","items":[{"type":"latex","content":"x^2","value":"#gorilla_repl.latex.LatexView{:content \"x^2\"}"},{"type":"latex","content":"x^3","value":"#gorilla_repl.latex.LatexView{:content \"x^3\"}"}]}
 ;; <=
 
 ;; @@

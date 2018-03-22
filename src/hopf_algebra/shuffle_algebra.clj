@@ -88,7 +88,7 @@
 (defn concat-coproduct [w]
   ;;
   ; this uses \Delta \tau \tau' = \Delta \tau \Delta \tau'
-  ; to calculate the coproduct
+  ; to calculate the coproduct (deshuffle)
   ;;
   (if (= 0 (count w))
     {[(->ConcatWord []) (->ConcatWord [])] 1}
@@ -114,6 +114,7 @@
   (product [a b] (lc-lift (->ConcatWord (concat (:content a) (:content b)))))
   (coproduct [a] (concat-coproduct (:content a)))
   (antipode [a] (concat-antipode (:content a)))
+  (counit [a] (if (empty? (:content a)) 1 0))
   (to-str [a] (if (empty? (:content a))
                    "e"
                    (apply str (:content a))))

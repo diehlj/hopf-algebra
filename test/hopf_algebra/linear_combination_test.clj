@@ -138,6 +138,12 @@
          {"one" {"c-1" 4/5}})))
 
   (is (=
+       {"one" {"c-1" 14}}
+       (lc-plus-apply-linear-function'
+         (fn [x] {x {"c-1" 7}})
+         {"one" 2})))
+
+  (is (=
        {"two" {"c-1" 4/5}}
        (lc-plus-apply-linear-function
          (fn [x] (if (= x "one") {} {x 1}))
@@ -163,4 +169,15 @@
            "key-2" 202 }
          "value")))
 
+  (is (= {(->Concatter "hellyeah") {(->Concatter "ab") 440, (->Concatter "Ab") 880}}
+         (lc-plus-multiply
+           10
+           {(->Concatter "hell") {(->Concatter "a") 11, (->Concatter "A") 22}}
+           {(->Concatter "yeah") {(->Concatter "b") 4}})))
+  (is (= {(->Concatter "hellyeahyeah") {(->Concatter "abc") 880}}
+         (lc-plus-multiply
+           2
+           {(->Concatter "hell") {(->Concatter "a") 11}}
+           {(->Concatter "yeah") {(->Concatter "b") 4}}
+           {(->Concatter "yeah") {(->Concatter "c") 10}})))
   )

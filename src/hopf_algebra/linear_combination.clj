@@ -185,6 +185,7 @@
   {:post [(lc? %)]}
   (lc-multiply (* (val a) (val b)) (tensor-multiply-using (key a) (key b) m)))
 
+; TODO lc-remove-zeros !
 (defn lc-multiply-using
   "Multiply linear combinations a,b using the function m.
    m must take two arguments (usually of type HopfAlgebra) and returns an lc."
@@ -291,7 +292,7 @@
   {:pre [(lcp? lc)]}
   (into {} (filter #( f (key %) ) lc )))
 
-(defn lc-plus-lift [x]
+(defn lc-plus-lift [x] ; XXX
   {:post [(lcp? %)]}
   { x {1 1} })
 
@@ -321,6 +322,10 @@
         (fn [x y] (lc-add x y))
         lcp1 lcp2))))
 
+
+                              ;)))))
+
+
 (defn- lc-plus-apply-linear-function-helper [lc-val lc]
   ;;
   ;| lc-val = {"C1" 55}    lc = {object-1 10, object-2 100}
@@ -343,6 +348,48 @@
                                       (lc-plus-apply-linear-function-helper (val nexxt) (f (key nexxt)))))
       {}
       lcp)))
+
+(defn- lc-plus-apply-linear-function'-helper [lc-val lc]
+  (into {} (map (fn [ [k v] ] [k (lc-multiply lc-val v)]) lc)))
+
+(defn lc-plus-apply-linear-function'
+  " f(x) = {x {'c-1' 7}}
+    lc = {x-1 2}
+    => { x-1 {'c-1' 14} }"
+  [f lc]
+  (lc-plus-remove-zeros
+    (reduce 
+      (fn [result nexxt] (lc-plus-add result
+                                      (lc-plus-apply-linear-function'-helper (val nexxt) (f (key nexxt)))))
+      {}
+      lc)))
+
+(defn- lc-plus-multiply-two
+  [a b]
+  (if (or (empty? a) (empty? b))
+    {}
+    (apply merge-with lc-add
+          (for [ [k-1 v-1] a
+                 [k-2 v-2] b ]
+            (let [coefficient (lc-multiply v-1 v-2)]
+              (lc-plus-apply-linear-function'
+                (fn [x] {x coefficient})
+                (tensor-multiply-using k-1 k-2 product)))))))
+
+(defn lc-plus-multiply
+  "Multiply an arbitrary number of lcp's.
+   First argument can be a scalar."
+  [ & args ]
+  (if (empty? args)
+    {}
+    (if (= 1 (count args))
+      (first args)
+      (let [ a (first args)
+             lcs (rest args) ]
+        (let [r (reduce (fn [x y] (lc-plus-multiply-two x y)) lcs)]
+          (if (number? a)
+            (lc-plus-multiply-scalar a r)
+            (lc-plus-multiply-two a r)))))))
 
 (defn lc->lcp
   "Converts a linear combination to a linear combination PLUS, i.e.
